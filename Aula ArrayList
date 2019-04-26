@@ -1,0 +1,89 @@
+package com.example.internet.database;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class MainActivity extends AppCompatActivity {
+
+    EditText editRa,editNome,editCurso;
+    Button btGravar, btListar,btDropar;
+    ListView lv;
+
+    SQLiteDatabase db;
+
+    ArrayList<String> listaNomes = new ArrayList<String>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        editCurso = findViewById(R.id.editCurso);
+        editNome = findViewById(R.id.editNome);
+        editRa = findViewById(R.id.editRa);
+
+        btDropar = findViewById(R.id.btDropar);
+        btGravar = findViewById(R.id.btGravar);
+        btListar = findViewById(R.id.btListar);
+
+        lv = findViewById(R.id.lista);
+
+        db = openOrCreateDatabase("AlunoDB", Context.MODE_PRIVATE,null);
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS alunos (ra VARCHAR, nome VARCHAR, curso VARCHAR)");
+
+        btGravar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String curso = editCurso.getText().toString();
+                String nome = editNome.getText().toString();
+                String ra = editRa.getText().toString();
+
+                String sql = "'"+ ra + "','" + nome + "','" + curso + "'";
+
+                db.execSQL("INSERT INTO alunos VALUES (" + sql + ")" );
+                Toast.makeText(MainActivity.this, "Dados Gravados.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btListar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listaNomes.clear();
+
+                Cursor c = db.rawQuery("SELECT * FROM alunos", null);
+
+                while(c.moveToNext()){
+                    listaNomes.add(c.getString(1));
+                    Log.d("nome",c.getString(1));
+                }
+
+                Collections.sort(listaNomes);
+
+                final ArrayAdapter<String> meuAdapter = new ArrayAdapter<String>(MainActivity this,android.R.layout.simple_expandable_list_item_1,listaNomes);
+                lv.setAdapter(meuAdapter);
+            }
+        });
+
+
+
+
+
+
+
+
+    }
+}
